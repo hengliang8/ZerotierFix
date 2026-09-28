@@ -104,10 +104,16 @@
 - 本地使用 JDK 11、Android SDK 33、NDK 23.1.7779620、CMake 3.22.1 和仓库的 Gradle Wrapper 7.5，首次 `:app:assembleDebug` 构建成功。APK 包含 arm64-v8a、armeabi-v7a、x86、x86_64 的 `libZeroTierOneJNI.so`。此时手机尚未连接，未进行设备验收。
 - 当前 Android Studio 自带 JDK 25；旧 Gradle 7.5 不支持用它运行构建。先固定 Gradle JDK 11 完成核心迁移；工具链升级可在设备验收后独立进行，以便定位问题。
 - 应用户要求，已移除调试构建的 `.dev` 应用 ID 后缀和独立应用标签。调试与正式构建都使用 `net.kaaass.zerotierfix`，版本均为 `1.0.11`（versionCode 15）。只有使用旧版同一密钥签名的正式 APK 才能覆盖安装；调试签名 APK 无法覆盖旧 Release。
-- Moon 文件导入路径已补齐目标目录创建和失败返回，避免文件移动失败时仍保存 Moon 记录并显示成功。修改后调试 APK 重新构建成功；文件导入与入轨的运行结果仍需在设备上验收。
+- Moon 文件导入路径已补齐目标目录创建和失败返回，避免文件移动失败时仍保存 Moon 记录并显示成功。修改后调试 APK 重新构建成功；用户随后在设备上确认 Moon 导入与目标 Peer 访问正常。
 - 用户已分别在旧 Release 与升级后的调试 APK 上验证关键场景：在小米 15（HyperOS 3.0、Android 16）上，导入其 Moon 文件后，可以通过 IPv4 访问此前无法访问的目标 Peers；不导入时只能访问其中一部分。这是用户报告的设备实测结果，确认了升级版保留原 ZerotierFix Moon 导入流程后的关键网络行为。其他功能及 IPv6 场景仍待验收。
-- `:app:assembleDebug :app:assembleRelease` 在移除 `.dev` 后均再次构建成功。正式构建产物 `app/build/outputs/apk/release/app-release-unsigned.apk` 尚未签名。
-- CI 已调整为使用仓库的 Gradle Wrapper 构建调试版与正式版；push 总是上传未签名 APK，只有配置签名 Secret 时才签名并上传正式 APK。当前 fork 没有配置签名 Secret，也没有现有 Release。此工作流尚未在 GitHub Actions 上运行验证。
+- `:app:assembleDebug :app:assembleRelease` 在移除 `.dev` 后均再次构建成功。正式 APK 已使用本 fork 的新密钥签名并通过 Android 签名校验；它不能覆盖原项目签名的 APK，首次切换需卸载旧版。
+- CI 已调整为使用仓库的 Gradle Wrapper 构建调试版与正式版；push 构建会在配置签名 Secret 后签名并上传正式 APK。GitHub Actions 构建和签名已成功。
+
+### 发布后设备验收
+
+- 已发布 [ZerotierFix 1.0.11（ZeroTier core 1.16.2）](https://github.com/hengliang8/ZerotierFix/releases/tag/v1.0.11-core-1.16.2)。
+- 用户确认正式发布的 APK 在小米 15（HyperOS 3.0、Android 16）上导入 Moon 后，能通过 IPv4 访问此前无法访问的目标 Peers。
+- 用户还确认，ZeroTier 官方 Android 客户端在导入同一 Moon 后，仍无法访问其中部分 Peers。这是设备上的行为对比；目前没有抓包或日志，不能据此确定具体根因。
 
 ## 参考资料
 
