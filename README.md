@@ -3,49 +3,42 @@
   <br>Zerotier Fix<br>
 </h1>
 
-<h4 align="center">An unofficial Zerotier Android client patched from official client.</h4>
+<p align="center">简体中文 | <a href="README.en.md">English</a></p>
+
+<h4 align="center">基于 ZerotierFix 的非官方 ZeroTier Android 客户端</h4>
 
 <p align="center">
-  <img src="screenshots/main.png" alt="main" width="150"/>
-  <img src="screenshots/peers.png" alt="peers" width="150"/>
-  <img src="screenshots/moons.png" alt="moons" width="150"/>
+  <img src="screenshots/main.png" alt="主界面" width="150"/>
+  <img src="screenshots/peers.png" alt="Peer 列表" width="150"/>
+  <img src="screenshots/moons.png" alt="Moon 列表" width="150"/>
 </p>
 
 <p align="center">
     <a href="https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml">
-        <img src="https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml/badge.svg" alt="Build APP"/>
+        <img src="https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml/badge.svg" alt="构建状态"/>
     </a>
 </p>
 
-## Features
+## 功能
 
-- Self-hosted Moon Support
-- Add custom planet config via file and URL
-- View peers list
-- Chinese translation
+- 支持自建 Moon，并可导入 Moon 文件
+- 支持通过文件或 URL 添加自定义 Planet 配置
+- 查看 Peer 列表
+- 中文界面
 
-This fork uses ZeroTier One core 1.16.2 and retains ZerotierFix's Moon file import.
-On the tested Xiaomi 15 (HyperOS 3.0, Android 16), importing the user's Moon file
-allowed IPv4 access to peers that were unreachable without it.
+本 fork 使用官方 ZeroTier One **1.16.2** 核心，保留 ZerotierFix 原有的 Moon 文件导入方式。用户在小米 15、HyperOS 3.0、Android 16 上验证：导入 Moon 文件后，可以通过 IPv4 访问此前无法访问的目标 Peer。
 
-## Download
+## 下载与安装
 
-Check [Releases page](https://github.com/hengliang8/ZerotierFix/releases) for the signed APK.
-This fork uses its own signing key. If the installed APK came from the original
-`kaaass/ZerotierFix` release, uninstall it before installing this fork's release.
-Android cannot install the new APK over the original because their signatures differ.
-Uninstalling clears the app's local configuration and ZeroTier identity; rejoin your
-networks, authorize the new member if required, and import your Moon file again.
-Future releases from this fork can update this fork's signed release in place.
+从 [Releases 页面](https://github.com/hengliang8/ZerotierFix/releases)下载已签名的 APK。
 
-Pull request builds are available from [GitHub Actions](https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml).
-These are debug-signed APKs and cannot update a release signed with a different key.
+本 fork 使用自己的签名密钥。如果手机安装的是原项目 `kaaass/ZerotierFix` 发布的 APK，必须先卸载旧版，再安装本 fork 的 APK。两者签名不同，Android 无法直接覆盖安装。**卸载会清除应用本地配置和 ZeroTier 身份**；安装后需要重新加入网络，必要时重新授权新节点，并再次导入 Moon 文件。以后使用同一密钥签名的本 fork 新版本可以直接覆盖本次发布的版本。
 
-## Build from source
+[GitHub Actions](https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml) 中的拉取请求构建使用调试签名，不能覆盖正式发布的 APK。
 
-The core submodule is pinned to official ZeroTier One 1.16.2. This repository keeps its
-Android JNI changes in `patches/zerotier-core-1.16.2.patch`. Prepare the submodule before
-opening the project in Android Studio:
+## 从源码构建
+
+`externals/core` 子模块固定在官方 ZeroTier One 1.16.2。Android JNI 适配保存在 `patches/zerotier-core-1.16.2.patch`。用 Android Studio 打开项目前，先初始化子模块并应用补丁：
 
 ```powershell
 git submodule sync --recursive
@@ -53,33 +46,21 @@ git submodule update --init --recursive
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-core.ps1
 ```
 
-On Linux or macOS, run `bash scripts/prepare-core.sh` in place of the PowerShell command.
-The preparation script is safe to run again. The submodule will appear modified locally
-after applying the patch; this is expected. The build workflow applies the same patch.
+Linux 或 macOS 上将最后一行换成 `bash scripts/prepare-core.sh`。准备脚本可以重复执行。应用补丁后，子模块在本地显示为已修改，这是预期现象；CI 构建也会应用同一补丁。
 
-The current build uses Android SDK Platform 33, NDK 23.1.7779620, CMake 3.22.1,
-and JDK 11 for Gradle. Android Studio can run on its bundled JDK while the project's
-**Gradle JDK** setting points to JDK 11. The repository includes Gradle Wrapper 7.5,
-so a separate Gradle installation is not needed.
+当前构建使用 Android SDK Platform 33、NDK 23.1.7779620、CMake 3.22.1，Gradle 使用 JDK 11。Android Studio 本身可以使用内置 JDK，但项目的 **Gradle JDK** 应设为 JDK 11。仓库已包含 Gradle Wrapper 7.5，无需单独安装 Gradle。
 
-See [the core upgrade plan](docs/upgrade-zerotier-core-1.16.md) for the migration and
-device verification status.
+升级过程和设备验证状态见 [ZeroTier 核心升级文档](docs/upgrade-zerotier-core-1.16.md)。
 
-## Copyright
+## 来源与致谢
 
-The code for this repository is based on the reverse engineering of the official Android client. The
-original author is Grant Limberg (glimberg@gmail.com). See [AUTHORS.md](https://github.com/zerotier/ZeroTierOne/blob/master/AUTHORS.md#primary-authors) for more details.
+本仓库基于 [kaaass/ZerotierFix](https://github.com/kaaass/ZerotierFix)。ZeroTier 核心来自 [zerotier/ZeroTierOne](https://github.com/zerotier/ZeroTierOne)，贡献者信息见其 [AUTHORS.md](https://github.com/zerotier/ZeroTierOne/blob/master/AUTHORS.md#primary-authors)。原 Android 客户端作者为 Grant Limberg。应用标志属于 ZeroTier, Inc. 的商标。
 
-- Zerotier JNI Sdk is located in git submodule `externals/core`
-- Original Android client code is located in `net.kaaass.zerotierfix` (renamed from `com.zerotier.one`)
-- App logo is a trademark of `ZeroTier, Inc.` and made by myself. 
+## 后续计划
 
-
-## Roadmap
-
-- [X] Add moon config persistent & file config
-- [x] Add peer list view
-- [x] Support planet config
-- [x] Replace pre-built JNI library
-- [x] Rewrite & update UI to fit Material Design
-- [ ] *WIP* Rewrite whole APP in v2
+- [x] 持久化 Moon 配置并支持文件导入
+- [x] 查看 Peer 列表
+- [x] 自定义 Planet 配置
+- [x] 从源码构建 JNI 库
+- [x] 更新 Material Design 界面
+- [ ] 在 v2 中重写应用
