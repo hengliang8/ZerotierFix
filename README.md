@@ -31,9 +31,12 @@ allowed IPv4 access to peers that were unreachable without it.
 ## Download
 
 Check [Releases page](https://github.com/hengliang8/ZerotierFix/releases) for the signed APK.
-The release keeps the existing application ID. An installed version can be updated
-in place when the APK is signed with the same key; keep the existing app installed
-to retain its configuration.
+This fork uses its own signing key. If the installed APK came from the original
+`kaaass/ZerotierFix` release, uninstall it before installing this fork's release.
+Android cannot install the new APK over the original because their signatures differ.
+Uninstalling clears the app's local configuration and ZeroTier identity; rejoin your
+networks, authorize the new member if required, and import your Moon file again.
+Future releases from this fork can update this fork's signed release in place.
 
 Pull request builds are available from [GitHub Actions](https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml).
 These are debug-signed APKs and cannot update a release signed with a different key.
