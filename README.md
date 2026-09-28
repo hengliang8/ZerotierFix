@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml">
-        <img src="https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml/badge.svg" alt="Build APP"/>
+    <a href="https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml">
+        <img src="https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml/badge.svg" alt="Build APP"/>
     </a>
 </p>
 
@@ -24,12 +24,19 @@
 - View peers list
 - Chinese translation
 
+This fork uses ZeroTier One core 1.16.2 and retains ZerotierFix's Moon file import.
+On the tested Xiaomi 15 (HyperOS 3.0, Android 16), importing the user's Moon file
+allowed IPv4 access to peers that were unreachable without it.
+
 ## Download
 
-Check [Releases page](https://github.com/kaaass/ZerotierFix/releases) for latest version.
+Check [Releases page](https://github.com/hengliang8/ZerotierFix/releases) for the signed APK.
+The release keeps the existing application ID. An installed version can be updated
+in place when the APK is signed with the same key; keep the existing app installed
+to retain its configuration.
 
-If you want to try the nightly build, you can download it from [GitHub Actions](https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml?query=branch%3Amaster).
-But please note that the nightly build may be **BUGGY** and **UNSTABLE**.
+Pull request builds are available from [GitHub Actions](https://github.com/hengliang8/ZerotierFix/actions/workflows/build-app.yml).
+These are debug-signed APKs and cannot update a release signed with a different key.
 
 ## Build from source
 

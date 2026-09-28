@@ -103,12 +103,11 @@
 - 子模块自身固定为官方公开提交 `fc5c3ec…`；补丁由准备脚本应用于工作树，因此构建时子模块显示为修改状态是预期现象。它不应被当成新的子模块提交指针提交。
 - 本地使用 JDK 11、Android SDK 33、NDK 23.1.7779620、CMake 3.22.1 和仓库的 Gradle Wrapper 7.5，首次 `:app:assembleDebug` 构建成功。APK 包含 arm64-v8a、armeabi-v7a、x86、x86_64 的 `libZeroTierOneJNI.so`。此时手机尚未连接，未进行设备验收。
 - 当前 Android Studio 自带 JDK 25；旧 Gradle 7.5 不支持用它运行构建。先固定 Gradle JDK 11 完成核心迁移；工具链升级可在设备验收后独立进行，以便定位问题。
-- 调试 APK 暂标 `1.0.11-dev`（versionCode 15），区别于原 Release `1.0.10`。重新构建后的文件为 `app/build/outputs/apk/debug/app-debug.apk`，SHA-256 为 `08A77F32EB0C0B7EAA98420BA2B4A076791B02B4F3D3DC6A9381262B5AD40C37`。这是调试签名产物，尚不能作为正式更新包发布。
-- 调试构建使用 `.dev` 应用 ID 后缀和 `Zerotier Fix Dev` 标签，可与现有 Release 同时安装，便于同机对比。它会生成独立 ZeroTier 节点身份，需在目标网络中单独授权。
+- 应用户要求，已移除调试构建的 `.dev` 应用 ID 后缀和独立应用标签。调试与正式构建都使用 `net.kaaass.zerotierfix`，版本均为 `1.0.11`（versionCode 15）。只有使用旧版同一密钥签名的正式 APK 才能覆盖安装；调试签名 APK 无法覆盖旧 Release。
 - Moon 文件导入路径已补齐目标目录创建和失败返回，避免文件移动失败时仍保存 Moon 记录并显示成功。修改后调试 APK 重新构建成功；文件导入与入轨的运行结果仍需在设备上验收。
-- 用户已分别在旧 Release 与新 Dev APK 上验证关键场景：在小米 15（HyperOS 3.0、Android 16）上，导入其 Moon 文件后，可以通过 IPv4 访问此前无法访问的目标 Peers；不导入时只能访问其中一部分。这是用户报告的设备实测结果，确认了升级版保留原 ZerotierFix Moon 导入流程后的关键网络行为。其他功能及 IPv6 场景仍待验收。
-- `:app:assembleDebug :app:assembleRelease` 均构建成功。调试版包名 `net.kaaass.zerotierfix.dev`、版本 `1.0.11-dev`，由 Android Debug 证书签名；正式构建包名 `net.kaaass.zerotierfix`、版本 `1.0.11`，产物 `app/build/outputs/apk/release/app-release-unsigned.apk` 尚未签名。正式 APK 必须由原签名流程处理后才能覆盖安装旧版。
-- CI 已调整为使用仓库的 Gradle Wrapper 分别构建 Dev 与正式 APK，PR 上传 Dev APK，push 使用现有签名 Secrets 对正式 APK 签名并上传。此工作流尚未在 GitHub Actions 上运行验证，且签名 Secrets 是否与旧 Release 相同仍需确认。
+- 用户已分别在旧 Release 与升级后的调试 APK 上验证关键场景：在小米 15（HyperOS 3.0、Android 16）上，导入其 Moon 文件后，可以通过 IPv4 访问此前无法访问的目标 Peers；不导入时只能访问其中一部分。这是用户报告的设备实测结果，确认了升级版保留原 ZerotierFix Moon 导入流程后的关键网络行为。其他功能及 IPv6 场景仍待验收。
+- `:app:assembleDebug :app:assembleRelease` 在移除 `.dev` 后均再次构建成功。正式构建产物 `app/build/outputs/apk/release/app-release-unsigned.apk` 尚未签名。
+- CI 已调整为使用仓库的 Gradle Wrapper 构建调试版与正式版；push 总是上传未签名 APK，只有配置签名 Secret 时才签名并上传正式 APK。当前 fork 没有配置签名 Secret，也没有现有 Release。此工作流尚未在 GitHub Actions 上运行验证。
 
 ## 参考资料
 

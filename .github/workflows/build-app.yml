@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HAS_SIGNING_KEY: ${{ secrets.SIGNING_KEY != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -32,11 +34,17 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'pull_request'
         with:
-          name: Zerotier-Fix-Dev
+          name: Zerotier-Fix-Debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Sign release APK
+      - uses: actions/upload-artifact@v4
         if: github.event_name == 'push'
+        with:
+          name: Zerotier-Fix-Unsigned
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Sign release APK
+        if: github.event_name == 'push' && env.HAS_SIGNING_KEY == 'true'
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
@@ -48,7 +56,7 @@ jobs:
           BUILD_TOOLS_VERSION: '30.0.3'
 
       - uses: actions/upload-artifact@v4
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.HAS_SIGNING_KEY == 'true'
         with:
           name: Zerotier-Fix-Release
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
