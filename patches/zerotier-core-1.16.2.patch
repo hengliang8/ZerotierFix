@@ -1,0 +1,142 @@
+diff --git a/java/CMakeLists.txt b/java/CMakeLists.txt
+index 008b747bc..11b191300 100644
+--- a/java/CMakeLists.txt
++++ b/java/CMakeLists.txt
+@@ -25,32 +25,9 @@ if(APPLE)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -fno-rtti")
+ endif()
+ 
++file(GLOB core_src_glob ../node/*.cpp)
++
+ set(src_files
+-    ../ext/lz4/lz4.c
+-    ../ext/json-parser/json.c
+-    ../ext/http-parser/http_parser.c
+-    ../node/C25519.cpp
+-    ../node/CertificateOfMembership.cpp
+-    ../node/Defaults.cpp
+-    ../node/Dictionary.cpp
+-    ../node/Identity.cpp
+-    ../node/IncomingPacket.cpp
+-    ../node/InetAddress.cpp
+-    ../node/Multicaster.cpp
+-    ../node/Network.cpp
+-    ../node/NetworkConfig.cpp
+-    ../node/Node.cpp
+-    ../node/OutboundMulticast.cpp
+-    ../node/Packet.cpp
+-    ../node/Peer.cpp
+-    ../node/Poly1305.cpp
+-    ../node/Salsa20.cpp
+-    ../node/SelfAwareness.cpp
+-    ../node/SHA512.cpp
+-    ../node/Switch.cpp
+-    ../node/Topology.cpp
+-    ../node/Utils.cpp
+-    ../osdep/Http.cpp
+     ../osdep/OSUtils.cpp
+     jni/com_zerotierone_sdk_Node.cpp
+     jni/ZT_jniutils.cpp
+@@ -60,6 +37,9 @@ set(src_files
+ set(include_dirs
+     ${CMAKE_CURRENT_SOURCE_DIR}/../include/
+     ${CMAKE_CURRENT_SOURCE_DIR}/../node/
++    ${CMAKE_CURRENT_SOURCE_DIR}/../ext/
++    ${CMAKE_CURRENT_SOURCE_DIR}/../ext/prometheus-cpp-lite-1.0/core/include/
++    ${CMAKE_CURRENT_SOURCE_DIR}/../ext/prometheus-cpp-lite-1.0/simpleapi/include/
+     ${Java_INCLUDE_DIRS})
+ 
+ if(WIN32)
+@@ -72,13 +52,13 @@ include_directories(
+     ${include_dirs}
+     )
+ 
+-add_library(${PROJECT_NAME} SHARED ${src_files})
++add_library(${PROJECT_NAME} SHARED ${src_files} ${core_src_glob})
+ 
+ if(APPLE)
+     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".jnilib")
+ endif()
+ 
+-set(link_libs )
++set(link_libs log)
+ 
+ if(WIN32)
+     set(link_libs
+@@ -88,4 +68,4 @@ if(WIN32)
+         )
+ endif()
+ 
+-target_link_libraries(${PROJECT_NAME} ${link_libs})
+\ No newline at end of file
++target_link_libraries(${PROJECT_NAME} ${link_libs})
+diff --git a/java/jni/ZT_jniutils.h b/java/jni/ZT_jniutils.h
+index 23664a732..b614ed3d6 100644
+--- a/java/jni/ZT_jniutils.h
++++ b/java/jni/ZT_jniutils.h
+@@ -24,6 +24,7 @@
+ 
+ #include <limits> // for numeric_limits
+ #include <sys/socket.h> // for sockaddr_storage
++#include <cassert> // for assert
+ 
+ #if defined(__ANDROID__)
+ 
+@@ -52,18 +53,49 @@
+     #define LOGE(...) fprintf(stdout, __VA_ARGS__)
+ #endif
+ 
++class JNIEnvGuard {
++public:
++    JNIEnvGuard(JavaVM *vm, const char* tag) : vm(vm), env(NULL), needDetach(false) {
++        jint ret;
++
++        assert(vm);
++        ret = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
++
++        if (ret == JNI_EDETACHED) {
++            ret = vm->AttachCurrentThread(&env, NULL);
++            needDetach = true;
++        }
++
++        if (ret != JNI_OK) {
++            __android_log_print(ANDROID_LOG_ERROR, tag, "Error calling GetEnv: %d", ret);
++            assert(false && "Error calling GetEnv");
++        }
++    }
++
++    JNIEnv *get() {
++        return env;
++    }
++
++    ~JNIEnvGuard() {
++        if (needDetach) {
++            assert(vm);
++            vm->DetachCurrentThread();
++        }
++        env = NULL;
++    }
++
++private:
++    JavaVM *vm;
++    JNIEnv *env;
++    bool needDetach;
++};
++
+ //
+ // Call GetEnv and assert if there is an error
+ //
+ #define GETENV(env, vm) \
+-    do { \
+-        jint getEnvRet; \
+-        assert(vm); \
+-        if ((getEnvRet = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6)) != JNI_OK) { \
+-            LOGE("Error calling GetEnv: %d", getEnvRet); \
+-            assert(false && "Error calling GetEnv"); \
+-        } \
+-    } while (false)
++    JNIEnvGuard envGuard_##__LINE__((vm), LOG_TAG); \
++    env = envGuard_##__LINE__.get()
+ 
+ //
+ // Call GetJavaVM and assert if there is an error

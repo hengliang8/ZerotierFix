@@ -25,6 +25,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    sourceSets {
+        main.java.srcDirs = ['../externals/core/java/src']
+    }
+
     externalNativeBuild {
         cmake {
             path file('../externals/core/java/CMakeLists.txt')

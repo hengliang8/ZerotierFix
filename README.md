@@ -31,6 +31,30 @@ Check [Releases page](https://github.com/kaaass/ZerotierFix/releases) for latest
 If you want to try the nightly build, you can download it from [GitHub Actions](https://github.com/kaaass/ZerotierFix/actions/workflows/build-app.yml?query=branch%3Amaster).
 But please note that the nightly build may be **BUGGY** and **UNSTABLE**.
 
+## Build from source
+
+The core submodule is pinned to official ZeroTier One 1.16.2. This repository keeps its
+Android JNI changes in `patches/zerotier-core-1.16.2.patch`. Prepare the submodule before
+opening the project in Android Studio:
+
+```powershell
+git submodule sync --recursive
+git submodule update --init --recursive
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-core.ps1
+```
+
+On Linux or macOS, run `bash scripts/prepare-core.sh` in place of the PowerShell command.
+The preparation script is safe to run again. The submodule will appear modified locally
+after applying the patch; this is expected. The build workflow applies the same patch.
+
+The current build uses Android SDK Platform 33, NDK 23.1.7779620, CMake 3.22.1,
+and JDK 11 for Gradle. Android Studio can run on its bundled JDK while the project's
+**Gradle JDK** setting points to JDK 11. The repository includes Gradle Wrapper 7.5,
+so a separate Gradle installation is not needed.
+
+See [the core upgrade plan](docs/upgrade-zerotier-core-1.16.md) for the migration and
+device verification status.
+
 ## Copyright
 
 The code for this repository is based on the reverse engineering of the official Android client. The

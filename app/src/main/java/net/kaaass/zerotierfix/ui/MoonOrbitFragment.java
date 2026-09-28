@@ -320,8 +320,12 @@ public class MoonOrbitFragment extends Fragment {
         if (fromFile) {
             File dest = new File(requireActivity().getFilesDir(),
                     String.format(MoonOrbit.MOON_FILE_PATH, moonWorldId));
-            if (!FileUtil.tempFile(requireContext()).renameTo(dest)) {
+            File moonDir = dest.getParentFile();
+            if (moonDir == null || (!moonDir.isDirectory() && !moonDir.mkdirs())
+                    || !FileUtil.tempFile(requireContext()).renameTo(dest)) {
                 Toast.makeText(getContext(), R.string.cannot_open_moon, Toast.LENGTH_LONG).show();
+                FileUtil.clearTempFile(requireContext());
+                return;
             }
             FileUtil.clearTempFile(requireContext());
         }
